@@ -1,0 +1,24 @@
+Generated on: 2025-05-12 21:00:19
+Sales Report
+=================
+Sale ID: 2
+Customer: nardos
+Product: mon
+Quantity: 13
+Total Price: $156.0
+Date: 2025-05-12 14:02:36.0
+-----------------
+Sale ID: 3
+Customer: nardos
+Product: mon
+Quantity: 100
+Total Price: $1200.0
+Date: 2025-05-12 14:03:15.0
+-----------------
+Sale ID: 5
+Customer: nardos
+Product: asus pc
+Quantity: 1
+Total Price: $1000.0
+Date: 2025-05-12 14:54:38.0
+-----------------

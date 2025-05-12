@@ -1,0 +1,6 @@
+Sale ID: 1
+Customer: nardos
+Product: mon
+Quantity: 10
+Total Price: $120.0
+Date: 2025-05-12 14:01:58.0

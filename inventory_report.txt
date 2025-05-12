@@ -1,0 +1,8 @@
+Inventory Report
+=================
+Product ID: 2
+Name: mon
+Category: gon
+Price: $12.0
+Stock: 0
+-----------------
