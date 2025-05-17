@@ -51,3 +51,9 @@ CREATE TABLE admins (
     role VARCHAR(50) NOT NULL,
     contact VARCHAR(50)
 );
+
+--sample admin
+INSERT INTO 'admins' ('id', 'ssn', 'name', 'username', 'email',
+ 'password', 'role', 'contact') 
+VALUES (NULL, '12-233-345-34', 'lake', 'lake', 'lake@example.com', 
+'lake1234', 'admin', '0987654321');
