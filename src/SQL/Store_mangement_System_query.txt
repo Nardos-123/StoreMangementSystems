@@ -39,3 +39,15 @@ CREATE TABLE sales (
 
 -- Insert default admin user
 INSERT INTO users (username, password) VALUES ('admin', 'admin123');
+
+--Admin table
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ssn VARCHAR(20) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    contact VARCHAR(50)
+);
