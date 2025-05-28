@@ -1,0 +1,6 @@
+Sale ID: 7
+Customer: abebe
+Product: samuseng
+Quantity: 90
+Total Price: $10800.0
+Date: 2025-05-13 08:55:16.0

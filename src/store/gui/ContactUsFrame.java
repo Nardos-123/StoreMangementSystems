@@ -54,7 +54,7 @@ public class ContactUsFrame extends JFrame {
         JLabel[] labels = {
             new JLabel("<html><b>Email:</b> support@store.com</html>"),
             new JLabel("<html><b>Phone:</b> (123) 456-7890</html>"),
-            new JLabel("<html><b>Address:</b> 123 Store St, City, Country</html>"),
+            new JLabel("<html><b>Address:</b> 123 Store St, Debre birhan, Ethiopa</html>"),
             new JLabel("<html><b>Hours:</b> Mon-Fri, 9 AM - 5 PM</html>")
         };
         for (JLabel label : labels) {
