@@ -1,6 +1,7 @@
 package com.store.gui;
 
 import com.store.db.DatabaseConnection;
+import org.mindrot.jbcrypt.BCrypt;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -115,16 +116,21 @@ public class LoginFrame extends JFrame {
         }
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT role FROM admins WHERE username = ? AND password = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT role, password FROM admins WHERE username = ?")) {
             stmt.setString(1, username);
-            stmt.setString(2, password); // Note: In production, use hashed passwords
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                String storedHash = rs.getString("password");
                 String role = rs.getString("role");
-                boolean isAdmin = "Admin".equalsIgnoreCase(role);
-                dispose();
-                new DashboardFrame(isAdmin).setVisible(true);
+                // Verify password using BCrypt
+                if (BCrypt.checkpw(password, storedHash)) {
+                    boolean isAdmin = "Admin".equalsIgnoreCase(role);
+                    dispose();
+                    new DashboardFrame(isAdmin, username).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid credentials!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!", "Error", JOptionPane.ERROR_MESSAGE);
             }

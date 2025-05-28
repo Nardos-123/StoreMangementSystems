@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 28, 2025 at 02:34 PM
+-- Generation Time: May 28, 2025 at 04:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -33,7 +33,7 @@ CREATE TABLE `admins` (
   `name` varchar(100) NOT NULL,
   `username` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` varchar(60) NOT NULL,
   `role` varchar(50) NOT NULL,
   `contact` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -43,10 +43,11 @@ CREATE TABLE `admins` (
 --
 
 INSERT INTO `admins` (`id`, `ssn`, `name`, `username`, `email`, `password`, `role`, `contact`) VALUES
-(1, '123-45-6789', 'Nahom Teshome', 'nahom', 'nahom@example.com', 'password123', 'Admin', '123-456-7890'),
-(4, '12-122-11-111', 'Nardos shumete', 'nardos', 'nardos@example.com', 'nardos123', 'security', '09876134445'),
-(5, '12-345-567-23', 'nati', 'nati', 'nati@gmail.com', 'nati1234', 'Admin', '09876544321'),
-(6, '12-233-345-34', 'lake', 'lake', 'lake@example.com', 'lake1234', 'admin', '0987654321');
+(1, '123-45-6789', 'Nahom Teshome', 'nahom', 'nahom@example.com', '$2a$10$bkV/lOKr4Zfm4S3j3oGFOeuCbjB4zhHiwEOPVOo1PL5fGtSqNQ3Ya', 'Admin', '123-456-7890'),
+(4, '12-122-11-111', 'Nardos shumete', 'nardos', 'nardos@example.com', '$2a$10$LOt1E1yuMrWvTFvMSvtYuetDrAVQxS3GhDONUvQbntC4m9GeP7Ijq', 'security', '09876134445'),
+(5, '12-345-567-23', 'nati', 'nati', 'nati@gmail.com', '$2a$10$O8i5DP6G0AA9L.QYPjuIxemYN3s4UWsiL6Oan1U2RLHGz4hb3fWHq', 'Admin', '09876544321'),
+(6, '12-233-345-34', 'lake', 'lake', 'lake@example.com', '$2a$10$Qf1UBVlsunmT67Fv/wEoA.s.KBZBneVCsHTk7sONpOaAcbnLOsW7i', 'admin', '0987654321'),
+(8, '1234567890', 'mulugeta', 'mulu', 'mulu@example.com', '$2a$10$AB7RNbid0gW7W.c78BgRSuz4kzhEXyiNnICX1fQwJftRxjzt1DA9.', 'admin', '09654321');
 
 -- --------------------------------------------------------
 
@@ -193,7 +194,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `customers`

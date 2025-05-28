@@ -7,14 +7,17 @@ import java.awt.event.MouseEvent;
 
 public class DashboardFrame extends JFrame {
     private final boolean isAdmin;
+    private final String currentUsername; // Store logged-in admin's username
 
-    public DashboardFrame(boolean isAdmin) {
+    public DashboardFrame(boolean isAdmin, String currentUsername) {
         this.isAdmin = isAdmin;
+        this.currentUsername = currentUsername;
         initialize();
     }
 
     public DashboardFrame() {
         this.isAdmin = false;
+        this.currentUsername = "defaultUser"; // Default for backward compatibility
         initialize();
     }
 
@@ -123,7 +126,7 @@ public class DashboardFrame extends JFrame {
             adminButton.addActionListener(e -> {
                 dispose();
                 try {
-                    new AdminFrame(isAdmin).setVisible(true);
+                    new AdminFrame(isAdmin, currentUsername).setVisible(true);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Error opening AdminFrame: " + ex.getMessage());
                 }
