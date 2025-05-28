@@ -3,6 +3,8 @@ package com.store.gui;
 import com.store.db.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.*;
 
 public class LoginFrame extends JFrame {
@@ -11,8 +13,8 @@ public class LoginFrame extends JFrame {
 
     public LoginFrame() {
         setTitle("Store Management System - Login");
-        setSize(600, 400);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(600, 400); // Stable size
+        setDefaultCloseOperation(EXIT_ON_CLOSE); // Stable close operation
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -34,7 +36,7 @@ public class LoginFrame extends JFrame {
         headerPanel.setBackground(Color.BLACK);
         headerPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2)); // White border for effect
         JLabel headerLabel = new JLabel("Welcome to Store Management System", SwingConstants.CENTER);
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Larger, bold font
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 32)); // Larger, bold font
         headerLabel.setForeground(Color.WHITE); // White text
         headerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding
         headerPanel.add(headerLabel);
@@ -81,35 +83,28 @@ public class LoginFrame extends JFrame {
         buttonPanel.setBackground(Color.BLACK); // Black background
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10)); // Add spacing
 
-        // Scale icons for better visibility
-        ImageIcon loginIcon = new ImageIcon(((ImageIcon) UIManager.getIcon("OptionPane.informationIcon")).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
-        ImageIcon exitIcon = new ImageIcon(((ImageIcon) UIManager.getIcon("OptionPane.errorIcon")).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+        // Load and scale external icons
+        ImageIcon loginIcon = createScaledIcon("/resources/icons/login.png");
+        ImageIcon exitIcon = createScaledIcon("/resources/icons/exit.png");
+
+        // Button styling
+        Color buttonBackground = new Color(0, 204, 0); // Brighter green
+        Color buttonHoverBackground = new Color(51, 255, 51); // Lighter green for hover
 
         JButton loginButton = new JButton("Login", loginIcon);
-        loginButton.setBackground(new Color(0, 204, 0)); // Brighter green
-        loginButton.setForeground(Color.BLACK);
-        loginButton.setFont(new Font("Arial", Font.BOLD, 16)); // Bold, larger font
-        loginButton.setOpaque(true);
-        loginButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1)); // Subtle border
-        loginButton.setPreferredSize(new Dimension(120, 40)); // Larger button
-        loginButton.setHorizontalTextPosition(SwingConstants.RIGHT); // Icon to the left
+        styleButton(loginButton, buttonBackground, buttonHoverBackground);
         loginButton.addActionListener(e -> authenticate());
         buttonPanel.add(loginButton);
 
         JButton exitButton = new JButton("Exit", exitIcon);
-        exitButton.setBackground(new Color(255, 51, 51)); // Brighter red
-        exitButton.setForeground(Color.WHITE);
-        exitButton.setFont(new Font("Arial", Font.BOLD, 16)); // Bold, larger font
-        exitButton.setOpaque(true);
-        exitButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1)); // Subtle border
-        exitButton.setPreferredSize(new Dimension(120, 40)); // Larger button
-        exitButton.setHorizontalTextPosition(SwingConstants.RIGHT); // Icon to the left
+        styleButton(exitButton, new Color(255, 51, 51), new Color(255, 102, 102)); // Brighter red, lighter red for hover
         exitButton.addActionListener(e -> System.exit(0));
         buttonPanel.add(exitButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    // Helper method to authenticate user
     private void authenticate() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -135,6 +130,45 @@ public class LoginFrame extends JFrame {
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Helper method to style buttons
+    private void styleButton(JButton button, Color background, Color hoverBackground) {
+        button.setBackground(background);
+        button.setForeground(button.getBackground() == Color.BLACK ? Color.WHITE : Color.BLACK); // Black text for green, white for red
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1)); // Subtle white border
+        button.setFocusPainted(false); // Remove focus border
+        button.setFont(new Font("Arial", Font.BOLD, 16)); // Bold, larger font
+        button.setPreferredSize(new Dimension(120, 40)); // Larger button size
+        button.setHorizontalTextPosition(SwingConstants.RIGHT); // Icon to the left
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(hoverBackground);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(background);
+            }
+        });
+    }
+
+    // Helper method to load and scale external icons
+    private ImageIcon createScaledIcon(String path) {
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(path));
+            if (icon.getIconWidth() == -1) { // Check if icon failed to load
+                System.err.println("Icon not found: " + path);
+                return new ImageIcon(((ImageIcon) UIManager.getIcon("OptionPane.informationIcon")).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            }
+            return new ImageIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+        } catch (Exception e) {
+            System.err.println("Error loading icon " + path + ": " + e.getMessage());
+            return new ImageIcon(((ImageIcon) UIManager.getIcon("OptionPane.informationIcon")).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
         }
     }
 }

@@ -24,9 +24,9 @@ public class AdminFrame extends JFrame {
         getContentPane().setBackground(new Color(255, 165, 0)); // Orange background
 
         // Header
-        JLabel headerLabel = new JLabel("Admin Management", SwingConstants.CENTER);
+        JLabel headerLabel = new JLabel("Admin Page", SwingConstants.CENTER);
         headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        headerLabel.setForeground(Color.RED); // Red header text
+        headerLabel.setForeground(Color.BLUE); // Red header text
         add(headerLabel, BorderLayout.NORTH);
 
         // Table

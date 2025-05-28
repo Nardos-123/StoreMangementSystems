@@ -2,6 +2,8 @@ package com.store.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DashboardFrame extends JFrame {
     private final boolean isAdmin;
@@ -18,19 +20,34 @@ public class DashboardFrame extends JFrame {
 
     private void initialize() {
         setTitle("Store Management System - Dashboard");
-        setSize(600, 400);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(600, 400); // Stable size
+        setDefaultCloseOperation(EXIT_ON_CLOSE); // Stable close operation
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // Set dark gray background for the content pane
         getContentPane().setBackground(Color.DARK_GRAY);
 
-        // Header
+        // Header with gradient background
+        JPanel headerPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(0, 102, 204), getWidth(), 0, Color.DARK_GRAY);
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        headerPanel.setBackground(Color.DARK_GRAY);
+        headerPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2)); // White border
         JLabel headerLabel = new JLabel("Dashboard", SwingConstants.CENTER);
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        headerLabel.setForeground(Color.WHITE); // White text for visibility
-        add(headerLabel, BorderLayout.NORTH);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 28)); // Larger, bold font
+        headerLabel.setForeground(Color.WHITE); // White text
+        headerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding
+        headerPanel.add(headerLabel);
+        add(headerPanel, BorderLayout.NORTH);
 
         // Button Panel
         JPanel buttonPanel = new JPanel(new GridLayout(3, 2, 20, 20));
@@ -39,11 +56,20 @@ public class DashboardFrame extends JFrame {
         buttonPanel.setOpaque(true);
 
         // Button styling
-        Color buttonBackground = new Color(0, 102, 204); // Blue background
-        Color buttonForeground = Color.WHITE; // White text
+        Color buttonBackground = new Color(0, 153, 255); // Brighter blue
+        Color buttonHoverBackground = new Color(51, 181, 255); // Lighter blue for hover
 
-        JButton inventoryButton = new JButton("Inventory Management");
-        styleButton(inventoryButton, buttonBackground, buttonForeground);
+        // Load and scale external icons
+        ImageIcon inventoryIcon = createScaledIcon("/resources/icons/inventory.png");
+        ImageIcon salesIcon = createScaledIcon("/resources/icons/sales.png");
+        ImageIcon customerIcon = createScaledIcon("/resources/icons/customer.png");
+        ImageIcon reportIcon = createScaledIcon("/resources/icons/report.png");
+        ImageIcon adminIcon = createScaledIcon("/resources/icons/admin.png");
+        ImageIcon contactIcon = createScaledIcon("/resources/icons/contact.png");
+        ImageIcon logoutIcon = createScaledIcon("/resources/icons/logout.png");
+
+        JButton inventoryButton = new JButton("Inventory Management", inventoryIcon);
+        styleButton(inventoryButton, buttonBackground, buttonHoverBackground);
         inventoryButton.addActionListener(e -> {
             dispose();
             try {
@@ -54,8 +80,8 @@ public class DashboardFrame extends JFrame {
         });
         buttonPanel.add(inventoryButton);
 
-        JButton salesButton = new JButton("Sales Processing");
-        styleButton(salesButton, buttonBackground, buttonForeground);
+        JButton salesButton = new JButton("Sales Processing", salesIcon);
+        styleButton(salesButton, buttonBackground, buttonHoverBackground);
         salesButton.addActionListener(e -> {
             dispose();
             try {
@@ -66,8 +92,8 @@ public class DashboardFrame extends JFrame {
         });
         buttonPanel.add(salesButton);
 
-        JButton customerButton = new JButton("Customer Management");
-        styleButton(customerButton, buttonBackground, buttonForeground);
+        JButton customerButton = new JButton("Customer Management", customerIcon);
+        styleButton(customerButton, buttonBackground, buttonHoverBackground);
         customerButton.addActionListener(e -> {
             dispose();
             try {
@@ -78,8 +104,8 @@ public class DashboardFrame extends JFrame {
         });
         buttonPanel.add(customerButton);
 
-        JButton reportButton = new JButton("Reporting");
-        styleButton(reportButton, buttonBackground, buttonForeground);
+        JButton reportButton = new JButton("Reporting", reportIcon);
+        styleButton(reportButton, buttonBackground, buttonHoverBackground);
         reportButton.addActionListener(e -> {
             dispose();
             try {
@@ -92,8 +118,8 @@ public class DashboardFrame extends JFrame {
 
         // Admin Management Button (only for admins)
         if (isAdmin) {
-            JButton adminButton = new JButton("Admin Management");
-            styleButton(adminButton, buttonBackground, buttonForeground);
+            JButton adminButton = new JButton("Admin Management", adminIcon);
+            styleButton(adminButton, buttonBackground, buttonHoverBackground);
             adminButton.addActionListener(e -> {
                 dispose();
                 try {
@@ -108,8 +134,8 @@ public class DashboardFrame extends JFrame {
         }
 
         // Contact Us Button
-        JButton contactButton = new JButton("Contact Us");
-        styleButton(contactButton, buttonBackground, buttonForeground);
+        JButton contactButton = new JButton("Contact Us", contactIcon);
+        styleButton(contactButton, buttonBackground, buttonHoverBackground);
         contactButton.addActionListener(e -> {
             try {
                 new ContactUsFrame().setVisible(true);
@@ -122,8 +148,8 @@ public class DashboardFrame extends JFrame {
         add(buttonPanel, BorderLayout.CENTER);
 
         // Exit Button
-        JButton exitButton = new JButton("Logout");
-        styleButton(exitButton, buttonBackground, buttonForeground);
+        JButton exitButton = new JButton("Logout", logoutIcon);
+        styleButton(exitButton, buttonBackground, buttonHoverBackground);
         exitButton.addActionListener(e -> {
             dispose();
             try {
@@ -134,17 +160,47 @@ public class DashboardFrame extends JFrame {
         });
         JPanel exitPanel = new JPanel();
         exitPanel.setBackground(Color.DARK_GRAY); // Dark gray background
+        exitPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding
         exitPanel.add(exitButton);
         add(exitPanel, BorderLayout.SOUTH);
     }
 
     // Helper method to style buttons
-    private void styleButton(JButton button, Color background, Color foreground) {
+    private void styleButton(JButton button, Color background, Color hoverBackground) {
         button.setBackground(background);
-        button.setForeground(foreground);
+        button.setForeground(Color.WHITE);
         button.setOpaque(true);
-        button.setBorderPainted(false); // Remove border for cleaner look
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1)); // Subtle white border
         button.setFocusPainted(false); // Remove focus border
-        button.setFont(new Font("Arial", Font.PLAIN, 14)); // Consistent font
+        button.setFont(new Font("Arial", Font.BOLD, 16)); // Bold, larger font
+        button.setPreferredSize(new Dimension(200, 50)); // Larger button size
+        button.setHorizontalTextPosition(SwingConstants.RIGHT); // Icon to the left
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(hoverBackground);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(background);
+            }
+        });
+    }
+
+    // Helper method to load and scale external icons
+    private ImageIcon createScaledIcon(String path) {
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(path));
+            if (icon.getIconWidth() == -1) { // Check if icon failed to load
+                System.err.println("Icon not found: " + path);
+                return new ImageIcon(((ImageIcon) UIManager.getIcon("OptionPane.informationIcon")).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+            }
+            return new ImageIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+        } catch (Exception e) {
+            System.err.println("Error loading icon " + path + ": " + e.getMessage());
+            return new ImageIcon(((ImageIcon) UIManager.getIcon("OptionPane.informationIcon")).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+        }
     }
 }
