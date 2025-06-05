@@ -23,7 +23,7 @@ public class DashboardFrame extends JFrame {
 
     private void initialize() {
         setTitle("Store Management System - Dashboard");
-        setSize(600, 400); // Stable size
+        setSize(1200, 700); // Stable size
         setDefaultCloseOperation(EXIT_ON_CLOSE); // Stable close operation
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

@@ -13,7 +13,7 @@ public class InventoryFrame extends JFrame {
 
     public InventoryFrame() {
         setTitle("Inventory Management");
-        setSize(800, 600);
+        setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

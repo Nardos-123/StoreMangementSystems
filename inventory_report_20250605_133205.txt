@@ -1,0 +1,45 @@
+Generated on: 2025-06-05 13:32:05
+Inventory Report
+=================
+Product ID: 2
+Name: mon
+Category: gon
+Price: $12.0
+Stock: 9
+-----------------
+Product ID: 3
+Name: asus pc
+Category: laptop
+Price: $1000.0
+Stock: 10
+-----------------
+Product ID: 4
+Name: book1
+Category: book
+Price: $12.0
+Stock: 10
+-----------------
+Product ID: 5
+Name: book1
+Category: book
+Price: $12.0
+Stock: 10
+-----------------
+Product ID: 6
+Name: jojo
+Category: milk
+Price: $2.0
+Stock: 100
+-----------------
+Product ID: 7
+Name: samuseng
+Category: mobile
+Price: $120.0
+Stock: 1
+-----------------
+Product ID: 9
+Name: laptop
+Category: computer
+Price: $1000.0
+Stock: 0
+-----------------

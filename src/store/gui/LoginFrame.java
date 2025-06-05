@@ -14,7 +14,7 @@ public class LoginFrame extends JFrame {
 
     public LoginFrame() {
         setTitle("Store Management System - Login");
-        setSize(600, 400); // Stable size
+        setSize(1200, 700); // Stable size
         setDefaultCloseOperation(EXIT_ON_CLOSE); // Stable close operation
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

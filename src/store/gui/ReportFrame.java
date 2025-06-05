@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 public class ReportFrame extends JFrame {
     public ReportFrame() {
         setTitle("Reporting");
-        setSize(600, 400);
+        setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

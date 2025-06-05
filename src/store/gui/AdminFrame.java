@@ -20,7 +20,7 @@ public class AdminFrame extends JFrame {
         this.isAdmin = isAdmin;
         this.currentUsername = currentUsername;
         setTitle("Store Management System - Admin Management");
-        setSize(800, 500); // Stable size
+        setSize(1200, 700); // Stable size
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); // Close operation
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
