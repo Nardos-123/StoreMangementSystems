@@ -5,15 +5,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 import javax.swing.table.DefaultTableModel;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class CustomerFrame extends JFrame {
     private JTextField nameField, emailField, phoneField;
+    private JPasswordField passwordField;
     private JTable customerTable;
     private DefaultTableModel customerTableModel;
 
     public CustomerFrame() {
         setTitle("Customer Management");
-        setSize(800, 600);
+        setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -62,6 +64,18 @@ public class CustomerFrame extends JFrame {
         phoneField.setForeground(Color.BLACK); // Black text
         formPanel.add(phoneField, gbc);
 
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setForeground(Color.WHITE); // White label text
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        formPanel.add(passwordLabel, gbc);
+
+        gbc.gridx = 1;
+        passwordField = new JPasswordField(20); // Increased width
+        passwordField.setBackground(Color.WHITE); // White background
+        passwordField.setForeground(Color.BLACK); // Black text
+        formPanel.add(passwordField, gbc);
+
         // Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15)); // Increased spacing
         buttonPanel.setBackground(new Color(139, 69, 19)); // Brown background
@@ -90,14 +104,14 @@ public class CustomerFrame extends JFrame {
         buttonPanel.add(exitButton);
 
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
 
         add(formPanel, BorderLayout.NORTH);
 
         // Customer Table
-        customerTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Email", "Phone"}, 0);
+        customerTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Email", "Phone", "Password"}, 0);
         customerTable = new JTable(customerTableModel);
         customerTable.setBackground(Color.GRAY); // Gray table background
         customerTable.setForeground(Color.BLACK);
@@ -107,6 +121,7 @@ public class CustomerFrame extends JFrame {
                 nameField.setText(customerTableModel.getValueAt(row, 1).toString());
                 emailField.setText(customerTableModel.getValueAt(row, 2).toString());
                 phoneField.setText(customerTableModel.getValueAt(row, 3).toString());
+                passwordField.setText(""); // Clear password field for security
             }
         });
         JScrollPane customerScrollPane = new JScrollPane(customerTable);
@@ -136,7 +151,8 @@ public class CustomerFrame extends JFrame {
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("email"),
-                    rs.getString("phone")
+                    rs.getString("phone"),
+                    rs.getString("password") != null ? "********" : "" // Mask password in UI
                 };
                 customerTableModel.addRow(rowData);
                 rowCount++;
@@ -150,14 +166,17 @@ public class CustomerFrame extends JFrame {
 
     private void addCustomer() {
         if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || phoneField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Name, email, and phone are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        String password = new String(passwordField.getPassword()).trim();
+        String hashedPassword = password.isEmpty() ? null : BCrypt.hashpw(password, BCrypt.gensalt());
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)")) {
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO customers (name, email, phone, password) VALUES (?, ?, ?, ?)")) {
             stmt.setString(1, nameField.getText().trim());
             stmt.setString(2, emailField.getText().trim());
             stmt.setString(3, phoneField.getText().trim());
+            stmt.setString(4, hashedPassword);
             stmt.executeUpdate();
             loadCustomers();
             clearFields();
@@ -175,16 +194,19 @@ public class CustomerFrame extends JFrame {
             return;
         }
         if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || phoneField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Name, email, and phone are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         int id = (int) customerTableModel.getValueAt(row, 0);
+        String password = new String(passwordField.getPassword()).trim();
+        String hashedPassword = password.isEmpty() ? null : BCrypt.hashpw(password, BCrypt.gensalt());
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("UPDATE customers SET name = ?, email = ?, phone = ? WHERE id = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("UPDATE customers SET name = ?, email = ?, phone = ?, password = ? WHERE id = ?")) {
             stmt.setString(1, nameField.getText().trim());
             stmt.setString(2, emailField.getText().trim());
             stmt.setString(3, phoneField.getText().trim());
-            stmt.setInt(4, id);
+            stmt.setString(4, hashedPassword);
+            stmt.setInt(5, id);
             stmt.executeUpdate();
             loadCustomers();
             clearFields();
@@ -233,5 +255,6 @@ public class CustomerFrame extends JFrame {
         nameField.setText("");
         emailField.setText("");
         phoneField.setText("");
+        passwordField.setText("");
     }
 }

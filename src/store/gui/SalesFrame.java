@@ -17,7 +17,7 @@ public class SalesFrame extends JFrame {
 
     public SalesFrame() {
         setTitle("Sales Processing");
-        setSize(800, 600);
+        setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
