@@ -7,7 +7,7 @@ import java.awt.geom.RoundRectangle2D;
 public class ContactUsFrame extends JFrame {
     public ContactUsFrame() {
         setTitle("Store Management System - Contact Us");
-        setSize(600, 400);
+        setSize(1200, 700);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         

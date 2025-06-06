@@ -119,6 +119,18 @@ public class DashboardFrame extends JFrame {
         });
         buttonPanel.add(reportButton);
 
+        // Contact Us Button
+        JButton contactButton = new JButton("Contact Us", contactIcon);
+        styleButton(contactButton, buttonBackground, buttonHoverBackground);
+        contactButton.addActionListener(e -> {
+            try {
+                new ContactUsFrame().setVisible(true);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error opening ContactUsFrame: " + ex.getMessage());
+            }
+        });
+        buttonPanel.add(contactButton);
+
         // Admin Management Button (only for admins)
         if (isAdmin) {
             JButton adminButton = new JButton("Admin Management", adminIcon);
@@ -135,18 +147,6 @@ public class DashboardFrame extends JFrame {
         } else {
             buttonPanel.add(new JLabel());
         }
-
-        // Contact Us Button
-        JButton contactButton = new JButton("Contact Us", contactIcon);
-        styleButton(contactButton, buttonBackground, buttonHoverBackground);
-        contactButton.addActionListener(e -> {
-            try {
-                new ContactUsFrame().setVisible(true);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error opening ContactUsFrame: " + ex.getMessage());
-            }
-        });
-        buttonPanel.add(contactButton);
 
         add(buttonPanel, BorderLayout.CENTER);
 
