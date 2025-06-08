@@ -19,6 +19,16 @@ public class CustomerRegistrationFrame extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(139, 69, 19)); // Brown background
 
+        // Description Panel
+        JPanel descriptionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        descriptionPanel.setBackground(new Color(139, 69, 19)); // Brown background
+        JLabel descriptionLabel = new JLabel("<html><center>Register as a new customer to start shopping with us!<br>Fill in your details below.<br>Don't Forget your Password!!</center></html>");
+        descriptionLabel.setForeground(new Color(255, 215, 165)); // Light gold
+        descriptionLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        descriptionLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Padding
+        descriptionPanel.add(descriptionLabel);
+        add(descriptionPanel, BorderLayout.NORTH);
+
         // Form Panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(new Color(139, 69, 19)); // Brown background
@@ -100,11 +110,26 @@ public class CustomerRegistrationFrame extends JFrame {
         clearButton.addActionListener(e -> clearFields());
         buttonPanel.add(clearButton);
 
+        JButton contactButton = new JButton("Contact Us");
+        styleButton(contactButton);
+        contactButton.addActionListener(e -> {
+            try {
+                new ContactUsFrame().setVisible(true);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error opening Contact Us page: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        buttonPanel.add(contactButton);
+
         JButton returnButton = new JButton("Return");
         styleButton(returnButton);
         returnButton.addActionListener(e -> {
             dispose();
-            new WelcomeFrame().setVisible(true); // Assumes DashboardFrame exists
+            try {
+                new WelcomeFrame().setVisible(true);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error returning to Welcome page: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         buttonPanel.add(returnButton);
 
@@ -196,8 +221,4 @@ public class CustomerRegistrationFrame extends JFrame {
         passwordField.setText("");
         confirmPasswordField.setText("");
     }
-
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(() -> new CustomerRegistrationFrame().setVisible(true));
-//    }
 }

@@ -99,7 +99,15 @@ public class LoginFrame extends JFrame {
 
         JButton exitButton = new JButton("Exit", exitIcon);
         styleButton(exitButton, new Color(255, 51, 51), new Color(255, 102, 102)); // Brighter red, lighter red for hover
-        exitButton.addActionListener(e -> System.exit(0));
+        exitButton.addActionListener(e -> {
+               dispose();
+            try {
+                new WelcomeFrame().setVisible(true);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error returning to Welcome page: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+          );
         buttonPanel.add(exitButton);
 
         add(buttonPanel, BorderLayout.SOUTH);

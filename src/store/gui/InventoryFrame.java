@@ -5,9 +5,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 import javax.swing.table.DefaultTableModel;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class InventoryFrame extends JFrame {
-    private JTextField nameField, categoryField, priceField, stockField;
+    private JTextField nameField, categoryField, priceField, stockField, searchField;
     private JTable productTable;
     private DefaultTableModel tableModel;
 
@@ -32,8 +33,26 @@ public class InventoryFrame extends JFrame {
         Color textFieldBackground = Color.WHITE; // White background for text fields
         Color textFieldForeground = Color.BLACK; // Black text for text fields
 
+        // Search Field
         gbc.gridx = 0;
         gbc.gridy = 0;
+        JLabel searchLabel = new JLabel("Search Product:");
+        searchLabel.setForeground(labelForeground);
+        formPanel.add(searchLabel, gbc);
+
+        gbc.gridx = 1;
+        searchField = new JTextField(20);
+        styleTextField(searchField, textFieldBackground, textFieldForeground);
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { searchProducts(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { searchProducts(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { searchProducts(); }
+        });
+        formPanel.add(searchField, gbc);
+
+        // Name Field
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         JLabel nameLabel = new JLabel("Name:");
         nameLabel.setForeground(labelForeground);
         formPanel.add(nameLabel, gbc);
@@ -43,8 +62,9 @@ public class InventoryFrame extends JFrame {
         styleTextField(nameField, textFieldBackground, textFieldForeground);
         formPanel.add(nameField, gbc);
 
+        // Category Field
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         JLabel categoryLabel = new JLabel("Category:");
         categoryLabel.setForeground(labelForeground);
         formPanel.add(categoryLabel, gbc);
@@ -54,8 +74,9 @@ public class InventoryFrame extends JFrame {
         styleTextField(categoryField, textFieldBackground, textFieldForeground);
         formPanel.add(categoryField, gbc);
 
+        // Price Field
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         JLabel priceLabel = new JLabel("Price:");
         priceLabel.setForeground(labelForeground);
         formPanel.add(priceLabel, gbc);
@@ -65,8 +86,9 @@ public class InventoryFrame extends JFrame {
         styleTextField(priceField, textFieldBackground, textFieldForeground);
         formPanel.add(priceField, gbc);
 
+        // Stock Field
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         JLabel stockLabel = new JLabel("Stock:");
         stockLabel.setForeground(labelForeground);
         formPanel.add(stockLabel, gbc);
@@ -108,7 +130,7 @@ public class InventoryFrame extends JFrame {
         buttonPanel.add(exitButton);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
 
@@ -158,11 +180,16 @@ public class InventoryFrame extends JFrame {
         button.setPreferredSize(new Dimension(150, 35)); // Increased button size
     }
 
-    private void loadProducts() {
+    private void searchProducts() {
         tableModel.setRowCount(0);
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM products")) {
+        String searchText = searchField.getText().trim();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "SELECT id, name, category, price, stock FROM products WHERE name LIKE ? OR category LIKE ? OR id LIKE ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, "%" + searchText + "%");
+            stmt.setString(2, "%" + searchText + "%");
+            stmt.setString(3, "%" + searchText + "%");
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 tableModel.addRow(new Object[]{
                     rs.getInt("id"),
@@ -175,6 +202,28 @@ public class InventoryFrame extends JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error loading products: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void loadProducts() {
+        searchProducts(); // Use search method with empty search text to load all products
+    }
+
+    private boolean verifyAdminPassword(String inputPassword) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement("SELECT password FROM admins");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String storedPasswordHash = rs.getString("password");
+                if (storedPasswordHash != null && !storedPasswordHash.isEmpty()) {
+                    if (BCrypt.checkpw(inputPassword, storedPasswordHash)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error verifying admin password: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
     }
 
     private void addProduct() {
@@ -199,6 +248,26 @@ public class InventoryFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Select a product to update!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // Admin password verification
+        JPasswordField adminPasswordField = new JPasswordField(10);
+        int option = JOptionPane.showConfirmDialog(this,
+                new Object[]{"Enter admin password:", adminPasswordField},
+                "Admin Verification",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (option != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String inputAdminPassword = new String(adminPasswordField.getPassword());
+        if (!verifyAdminPassword(inputAdminPassword)) {
+            JOptionPane.showMessageDialog(this,
+                    "Incorrect admin password! Update aborted.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int id = (int) tableModel.getValueAt(row, 0);
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement("UPDATE products SET name = ?, category = ?, price = ?, stock = ? WHERE id = ?")) {
@@ -222,6 +291,26 @@ public class InventoryFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Select a product to remove!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // Admin password verification
+        JPasswordField adminPasswordField = new JPasswordField(10);
+        int option = JOptionPane.showConfirmDialog(this,
+                new Object[]{"Enter admin password:", adminPasswordField},
+                "Admin Verification",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (option != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String inputAdminPassword = new String(adminPasswordField.getPassword());
+        if (!verifyAdminPassword(inputAdminPassword)) {
+            JOptionPane.showMessageDialog(this,
+                    "Incorrect admin password! Deletion aborted.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int id = (int) tableModel.getValueAt(row, 0);
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement("DELETE FROM products WHERE id = ?")) {

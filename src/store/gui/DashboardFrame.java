@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.*;
+import com.store.db.DatabaseConnection;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class DashboardFrame extends JFrame {
     private final boolean isAdmin;
@@ -119,6 +122,14 @@ public class DashboardFrame extends JFrame {
         });
         buttonPanel.add(reportButton);
 
+        // Admin Management Button (always visible)
+        JButton adminButton = new JButton("Admin Management", adminIcon);
+        styleButton(adminButton, buttonBackground, buttonHoverBackground);
+        adminButton.addActionListener(e -> {
+            showAdminVerificationDialog();
+        });
+        buttonPanel.add(adminButton);
+
         // Contact Us Button
         JButton contactButton = new JButton("Contact Us", contactIcon);
         styleButton(contactButton, buttonBackground, buttonHoverBackground);
@@ -130,23 +141,6 @@ public class DashboardFrame extends JFrame {
             }
         });
         buttonPanel.add(contactButton);
-
-        // Admin Management Button (only for admins)
-        if (isAdmin) {
-            JButton adminButton = new JButton("Admin Management", adminIcon);
-            styleButton(adminButton, buttonBackground, buttonHoverBackground);
-            adminButton.addActionListener(e -> {
-                dispose();
-                try {
-                    new AdminFrame(isAdmin, currentUsername).setVisible(true);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Error opening AdminFrame: " + ex.getMessage());
-                }
-            });
-            buttonPanel.add(adminButton);
-        } else {
-            buttonPanel.add(new JLabel());
-        }
 
         add(buttonPanel, BorderLayout.CENTER);
 
@@ -166,6 +160,94 @@ public class DashboardFrame extends JFrame {
         exitPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding
         exitPanel.add(exitButton);
         add(exitPanel, BorderLayout.SOUTH);
+    }
+
+    private void showAdminVerificationDialog() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.DARK_GRAY);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(usernameLabel, gbc);
+
+        JTextField usernameField = new JTextField(15);
+        usernameField.setBackground(Color.WHITE);
+        usernameField.setForeground(Color.BLACK);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        panel.add(usernameField, gbc);
+
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(passwordLabel, gbc);
+
+        JPasswordField passwordField = new JPasswordField(15);
+        passwordField.setBackground(Color.WHITE);
+        passwordField.setForeground(Color.BLACK);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        panel.add(passwordField, gbc);
+
+        JLabel roleLabel = new JLabel("Role:");
+        roleLabel.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(roleLabel, gbc);
+
+        JComboBox<String> roleCombo = new JComboBox<>(new String[]{"admin", "other"});
+        roleCombo.setBackground(Color.WHITE);
+        roleCombo.setForeground(Color.BLACK);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        panel.add(roleCombo, gbc);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Admin Verification",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            String username = usernameField.getText().trim();
+            String password = new String(passwordField.getPassword());
+            String role = roleCombo.getSelectedItem().toString();
+            if (verifyAdminCredentials(username, password, role)) {
+                dispose();
+                try {
+                    new AdminFrame(true, username).setVisible(true);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error opening AdminFrame: " + ex.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid credentials or role! Access denied.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private boolean verifyAdminCredentials(String username, String password, String role) {
+        if (!"admin".equalsIgnoreCase(role)) {
+            return false;
+        }
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement("SELECT password FROM admins WHERE username = ? AND role = ?");
+            stmt.setString(1, username);
+            stmt.setString(2, role);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String storedPasswordHash = rs.getString("password");
+                if (storedPasswordHash != null && !storedPasswordHash.isEmpty()) {
+                    return BCrypt.checkpw(password, storedPasswordHash);
+                }
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error verifying admin credentials: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
     }
 
     // Helper method to style buttons

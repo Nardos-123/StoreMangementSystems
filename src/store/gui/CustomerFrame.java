@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class CustomerFrame extends JFrame {
-    private JTextField nameField, emailField, phoneField;
+    private JTextField nameField, emailField, phoneField, searchField;
     private JPasswordField passwordField;
     private JTable customerTable;
     private DefaultTableModel customerTableModel;
@@ -27,11 +27,29 @@ public class CustomerFrame extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10); // Increased spacing
 
-        // Labels and Text Fields
-        JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setForeground(Color.WHITE); // White label text
+        // Search Field
         gbc.gridx = 0;
         gbc.gridy = 0;
+        JLabel searchLabel = new JLabel("Search Customer:");
+        searchLabel.setForeground(Color.WHITE); // White label text
+        formPanel.add(searchLabel, gbc);
+
+        gbc.gridx = 1;
+        searchField = new JTextField(20); // Increased width
+        searchField.setBackground(Color.WHITE); // White background
+        searchField.setForeground(Color.BLACK); // Black text
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { searchCustomers(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { searchCustomers(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { searchCustomers(); }
+        });
+        formPanel.add(searchField, gbc);
+
+        // Name Field
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        JLabel nameLabel = new JLabel("Name:");
+        nameLabel.setForeground(Color.WHITE); // White label text
         formPanel.add(nameLabel, gbc);
 
         gbc.gridx = 1;
@@ -40,10 +58,11 @@ public class CustomerFrame extends JFrame {
         nameField.setForeground(Color.BLACK); // Black text
         formPanel.add(nameField, gbc);
 
+        // Email Field
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         JLabel emailLabel = new JLabel("Email:");
         emailLabel.setForeground(Color.WHITE); // White label text
-        gbc.gridx = 0;
-        gbc.gridy = 1;
         formPanel.add(emailLabel, gbc);
 
         gbc.gridx = 1;
@@ -52,10 +71,11 @@ public class CustomerFrame extends JFrame {
         emailField.setForeground(Color.BLACK); // Black text
         formPanel.add(emailField, gbc);
 
+        // Phone Field
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         JLabel phoneLabel = new JLabel("Phone:");
         phoneLabel.setForeground(Color.WHITE); // White label text
-        gbc.gridx = 0;
-        gbc.gridy = 2;
         formPanel.add(phoneLabel, gbc);
 
         gbc.gridx = 1;
@@ -64,10 +84,11 @@ public class CustomerFrame extends JFrame {
         phoneField.setForeground(Color.BLACK); // Black text
         formPanel.add(phoneField, gbc);
 
+        // Password Field
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setForeground(Color.WHITE); // White label text
-        gbc.gridx = 0;
-        gbc.gridy = 3;
         formPanel.add(passwordLabel, gbc);
 
         gbc.gridx = 1;
@@ -104,7 +125,7 @@ public class CustomerFrame extends JFrame {
         buttonPanel.add(exitButton);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
 
@@ -129,7 +150,7 @@ public class CustomerFrame extends JFrame {
         add(customerScrollPane, BorderLayout.CENTER);
 
         // Load customers after UI is initialized
-        SwingUtilities.invokeLater(this::loadCustomers);
+        SwingUtilities.invokeLater(this::searchCustomers);
     }
 
     private void styleButton(JButton button) {
@@ -140,11 +161,16 @@ public class CustomerFrame extends JFrame {
         button.setBorder(BorderFactory.createRaisedBevelBorder());
     }
 
-    private void loadCustomers() {
+    private void searchCustomers() {
         customerTableModel.setRowCount(0);
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM customers")) {
+        String searchText = searchField.getText().trim();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "SELECT id, name, email, phone, password FROM customers WHERE name LIKE ? OR email LIKE ? OR id LIKE ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, "%" + searchText + "%");
+            stmt.setString(2, "%" + searchText + "%");
+            stmt.setString(3, "%" + searchText + "%");
+            ResultSet rs = stmt.executeQuery();
             int rowCount = 0;
             while (rs.next()) {
                 Object[] rowData = new Object[]{
@@ -162,6 +188,29 @@ public class CustomerFrame extends JFrame {
             System.err.println("Error loading customers: " + ex.getMessage());
             JOptionPane.showMessageDialog(this, "Error loading customers: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private boolean verifyAdminPassword(String inputPassword) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement("SELECT password FROM admins");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String storedPasswordHash = rs.getString("password");
+                if (storedPasswordHash != null && !storedPasswordHash.isEmpty()) {
+                    if (BCrypt.checkpw(inputPassword, storedPasswordHash)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error verifying admin password: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error verifying admin password: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
+    }
+
+    private void loadCustomers() {
+        searchCustomers(); // Use search method with empty search text to load all customers
     }
 
     private void addCustomer() {
@@ -197,6 +246,26 @@ public class CustomerFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Name, email, and phone are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // Admin password verification
+        JPasswordField adminPasswordField = new JPasswordField(10);
+        int option = JOptionPane.showConfirmDialog(this,
+                new Object[]{"Enter admin password:", adminPasswordField},
+                "Admin Verification",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (option != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String inputAdminPassword = new String(adminPasswordField.getPassword());
+        if (!verifyAdminPassword(inputAdminPassword)) {
+            JOptionPane.showMessageDialog(this,
+                    "Incorrect admin password! Update aborted.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int id = (int) customerTableModel.getValueAt(row, 0);
         String password = new String(passwordField.getPassword()).trim();
         String hashedPassword = password.isEmpty() ? null : BCrypt.hashpw(password, BCrypt.gensalt());
